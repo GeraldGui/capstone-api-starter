@@ -24,9 +24,7 @@ public class CategoriesController
     private CategoryService categoryService;
     private ProductService productService;
 
-
-    // create an Autowired constructor to inject the categoryService and productService
-
+    // create an Autowired constructor to inject the categoryService and productServic
     public CategoriesController(CategoryService categoryService, ProductService productService) {
         this.categoryService = categoryService;
         this.productService = productService;
@@ -76,18 +74,31 @@ public class CategoriesController
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Category updateCategory(@PathVariable int id, @RequestBody Category category)
     {
         // update the category by id and return the updated category (200 OK)
-        return null;
+        Category saved = categoryService.update(id, category);
+
+        if (saved == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No category with id " + id);
+        }
+        return saved;
     }
 
 
     // add annotation to call this method for a DELETE action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable int id)
     {
         // delete the category by id and return status 204 No Content
-        return null;
+        if (categoryService.getById(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No category wiht id " + id);
+        }
+        categoryService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
