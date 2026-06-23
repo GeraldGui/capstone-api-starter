@@ -1,7 +1,10 @@
 package org.yearup.controllers;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.yearup.models.ShoppingCart;
 import org.yearup.models.ShoppingCartItem;
 import org.yearup.models.User;
@@ -45,12 +48,13 @@ public class ShoppingCartController
     // https://localhost:8080/cart/products/15  (15 is the productId to be added)
     // return the updated cart with status 201 Created
     @PostMapping("/products/{id}")
-    public ShoppingCart addProduct(@PathVariable int id, Principal principal) {
+    public ResponseEntity<ShoppingCart> addProduct(@PathVariable int id, Principal principal) {
         String userName = principal.getName();
         User user = userService.getByUserName(userName);
         int userId = user.getId();
 
-        return shoppingCartService.addProductService(userId, id);
+        ShoppingCart cart = shoppingCartService.addProductService(userId, id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cart);
     }
 
 
@@ -58,17 +62,31 @@ public class ShoppingCartController
     // https://localhost:8080/cart/products/15  (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated; return the cart (200 OK)
     @PutMapping("/products/{id}")
-    public ShoppingCart updateProduct(@PathVariable int id, Principal principal, @RequestBody ShoppingCartItem shoppingCartItem) {
+    public ResponseEntity<ShoppingCart> updateProduct(@PathVariable int id, Principal principal, @RequestBody ShoppingCartItem shoppingCartItem) {
         String userName = principal.getName();
         User user = userService.getByUserName(userName);
         int userId = user.getId();
 
         int quantity = shoppingCartItem.getQuantity();
-        return shoppingCartService.updateProduct(userId, id, quantity);
+        ShoppingCart cart = shoppingCartService.updateProduct(userId, id, quantity);
+
+        if (quantity > 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(cart);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(cart);
     }
 
 
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart  - return the (now empty) cart so the front end can refresh it (200 OK)
+    @DeleteMapping
+    public ShoppingCart deleteCart(Principal principal) {
+        String userName = principal.getName();
+        User user = userService.getByUserName(userName);
+        int userId = user.getId();
+
+        return shoppingCartService.deleteCartService(userId);
+    }
 
 }
