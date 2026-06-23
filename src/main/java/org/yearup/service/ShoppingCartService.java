@@ -34,4 +34,20 @@ public class ShoppingCartService
     }
 
     // add additional methods here
+    public ShoppingCart addProductService(int userId, int productId) {
+        CartItem exist = shoppingCartRepository.findByUserIdAndProductId(userId, productId);
+
+        if (exist == null) {
+            CartItem cartItem = new CartItem();
+            cartItem.setUserId(userId);
+            cartItem.setProductId(productId);
+            cartItem.setQuantity(1);
+            shoppingCartRepository.save(cartItem);
+            return getByUserId(userId);
+        } else {
+            exist.setQuantity(exist.getQuantity() + 1);
+            shoppingCartRepository.save(exist);
+            return getByUserId(userId);
+        }
+    }
 }
