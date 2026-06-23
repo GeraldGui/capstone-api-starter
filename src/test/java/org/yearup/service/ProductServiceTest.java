@@ -9,8 +9,10 @@ import org.yearup.models.Product;
 import org.yearup.repository.ProductRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,5 +52,20 @@ class ProductServiceTest {
 
         // Assert
         assertEquals(2, found.size());
+    }
+
+    @Test
+    void update_whenProductExists_shouldUpdateAllFields() {
+        // Arrange
+        Product godOfWar = new Product(1, "God Of War", 49.99, 1, "RPG", null, 5, true, null);
+        Product mario = new Product(2, "Mario Kart", 89.99, 4, "Adventure", null, 5, true, null);
+        when(productRepository.findById(1)).thenReturn(Optional.of(godOfWar));
+
+
+        // Act
+        productService.update(1, mario);
+
+        // Assert
+        verify(productRepository).save(godOfWar);
     }
 }
