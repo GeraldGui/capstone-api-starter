@@ -22,8 +22,8 @@ import java.security.Principal;
 public class ShoppingCartController
 {
     // a shopping cart controller depends on the service layer
-    private ShoppingCartService shoppingCartService;
-    private UserService userService;
+    private final ShoppingCartService shoppingCartService;
+    private final UserService userService;
 
     public ShoppingCartController(ShoppingCartService shoppingCartService, UserService userService) {
         this.shoppingCartService = shoppingCartService;
